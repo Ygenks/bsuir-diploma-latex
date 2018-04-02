@@ -1,6 +1,3 @@
-% This file was created with JabRef 2.9.2.
-% Encoding: utf8
-
 @MISC{pgm_course,
   author = {\mbox{Stanford University}},
   title = {Probabilistic Graphical Models [Электронный ресурс]},
@@ -14,9 +11,9 @@
 @BOOK{albahari_2012_en,
   title = {C\# 5.0 in a Nutshell},
   publisher = {O’Reilly Media, Inc},
-  year = {2012},
+  year = 2012,
   author = {Joseph Albahari and Ben Albahari},
-  pages = {1062},
+  pages = 1062,
   edition = {5-th},
   month = {June},
   owner = {mstyura},
@@ -29,16 +26,16 @@
   title = {{The ALARM Monitoring System: A Case Study with Two Probabilistic
 	Inference Techniques for Belief Networks}},
   booktitle = {Second European Conference on Artificial Intelligence in Medicine},
-  year = {1989},
+  year = 1989,
   editor = {Hunter, J. and Cookson, J. and Wyatt, J.},
-  volume = {38},
+  volume = 38,
   pages = {247--256},
   address = {Berlin, Germany},
   publisher = {Springer-Verlag},
-  citeulike-article-id = {1616436},
+  citeulike-article-id = 1616436,
   keywords = {alarm, bayesian\_network},
   posted-at = {2007-09-03 16:53:17},
-  priority = {0}
+  priority = 0
 }
 
 @MISC{Chickering96learningbayesian,
@@ -558,3 +555,118 @@
   timestamp = {2013.03.19}
 }
 
+@INPROCEEDINGS{asano_dip_comp,
+author={S. Asano and T. Maruyama and Y. Yamaguchi},
+booktitle={2009 International Conference on Field Programmable Logic and Applications},
+title={Performance comparison of FPGA, GPU and CPU in image processing},
+year={2009},
+volume={},
+number={},
+pages={126-131},
+abstract={Many applications in image processing have high inherent parallelism. FPGAs have shown very high performance in spite of their low operational frequency by fully extracting the parallelism. In recent micro processors, it also becomes possible to utilize the parallelism using multi-cores which support improved SIMD instructions, though programmers have to use them explicitly to achieve high performance. Recent GPUs support a large number of cores, and have a potential for high performance in many applications. However, the cores are grouped, and data transfer between the groups is very limited. Programming tools for FPGA, SIMD instructions on CPU and a large number of cores on GPU have been developed, but it is still difficult to achieve high performance on these platforms. In this paper, we compare the performance of FPGA, GPU and CPU using three applications in image processing; two-dimensional filters, stereo-vision and k-means clustering, and make it clear which platform is faster under which conditions.},
+keywords={computer graphic equipment;field programmable gate arrays;parallel programming;pattern clustering;stereo image processing;two-dimensional digital filters;visual perception;CPU;FPGA;GPU;SIMD instruction;image processing;k-means clustering;micro processor;parallel programming;stereo-vision;two-dimensional filter;Cache memory;Central Processing Unit;Data mining;Field programmable gate arrays;Filters;Frequency;Graphics;Image processing;Systems engineering and theory;Yarn},
+doi={10.1109/FPL.2009.5272532},
+ISSN={1946-147X},
+month={Aug},}
+
+@mastersthesis{axell_cpu_simd,
+author={Axell, Tobias and Fridén, Mattias},
+title={Comparison between GPU and parallel CPU optimizations in viewshed analysis},
+abstract={Parallel CPU implementations of a viewshed algorithm using both multithreading and SIMD vectorization and GPU implementations were implemented and compared in this study. The results show that parallelism is essential for achieving good performance on a CPU, and that data transfer can be partly overlapped by computations to hide some of the overheads in GPU implementations. The GPU implementation was the fastest with a performance approximately 3 times faster than the parallel CPU implementation for the hardware the tests were performed on.},
+publisher={Department of Computer Science and Engineering (Chalmers), Chalmers University of Technology},
+place={Göteborg},
+year={2015},
+keywords={viewshed, line of sight, GPU, parallel CPU, SIMD, vectorization, R2},
+note={63},
+}
+
+@book{patterson_hennessy,
+ author = {Patterson, David A. and Hennessy, John L.},
+ title = {Computer Organization and Design, Fifth Edition: The Hardware/Software Interface},
+ year = {2013},
+ isbn = {0124077269, 9780124077263},
+ edition = {5th},
+ publisher = {Morgan Kaufmann Publishers Inc.},
+ address = {San Francisco, CA, USA},
+}
+
+@ARTICLE{maceina_gpu_real_time,
+author={T. J. Maceina and G. Manduchi},
+journal={IEEE Transactions on Nuclear Science},
+title={Assessment of General Purpose GPU Systems in Real-Time Control},
+year={2017},
+volume={64},
+number={6},
+pages={1455-1460},
+abstract={The recent advances in GPU technology is offering great prospects in computation. However, the penetration of the GPU technology in real-time control has been somewhat limited due to two main reasons: 1) control algorithms for real-time applications involving highly parallel computation are not very common in practical applications and 2) the excellent performance in computation of GPUs is paid for by a penalty in memory transfer. As a consequence, GPU applications for real-time controls suffer from an often unacceptable latency. We present the factors that affect the performance of GPUs in real-time applications in fusion research in order to provide some hints to designers facing the option of using either a multithreaded, multicore CPU application or a GPU. In particular, we consider GPU usage in two common use cases in real-time applications in fusion research: dense matrix-vector multiplication for large state space-based control and online image analysis for feature extraction in camera-based diagnostics. Two applications mimicking the two use cases have been developed using the Tesla K40 GPU architecture, and the performance results are reported.},
+keywords={feature extraction;graphics processing units;image processing;multi-threading;multiprocessing programs;parallel processing;real-time systems;GPU technology;camera-based diagnostics;feature extraction;general purpose GPU systems;large state space-based control;multicore CPU application;multithreaded CPU application;online image analysis;parallel computation;real-time control;Graphics processing units;Instruction sets;Kernel;Memory management;Real-time systems;Tomography;GPUs;parallel processing;real-time systems},
+doi={10.1109/TNS.2017.2691061},
+ISSN={0018-9499},
+month={June},
+}
+
+@inproceedings{fowers_gpu_power_consumption,
+ author = {Fowers, Jeremy and Brown, Greg and Cooke, Patrick and Stitt, Greg},
+ title = {A Performance and Energy Comparison of FPGAs, GPUs, and Multicores for Sliding-window Applications},
+ booktitle = {Proceedings of the ACM/SIGDA International Symposium on Field Programmable Gate Arrays},
+ series = {FPGA '12},
+ year = {2012},
+ isbn = {978-1-4503-1155-7},
+ location = {Monterey, California, USA},
+ pages = {47--56},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/2145694.2145704},
+ doi = {10.1145/2145694.2145704},
+ acmid = {2145704},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {FPGA, GPU, multicore, parallelism, sliding window, speedup},
+}
+
+@article{amara_asic_low_power,
+title = "FPGA vs. ASIC for low power applications",
+journal = "Microelectronics Journal",
+volume = "37",
+number = "8",
+pages = "669 - 677",
+year = "2006",
+issn = "0026-2692",
+doi = "https://doi.org/10.1016/j.mejo.2005.11.003",
+url = "http://www.sciencedirect.com/science/article/pii/S0026269205003927",
+author = "Amara Amara and Frédéric Amiel and Thomas Ea",
+keywords = "FPGA, ASIC, Low power, Clock gating, Power consumption"
+}
+
+@book{smith_asic_economy,
+ author = {Smith, Michael John Sebastian},
+ title = {Application-specific Integrated Circuits},
+ year = {1997},
+ isbn = {0-201-50022-1},
+ publisher = {Addison-Wesley Longman Publishing Co., Inc.},
+ address = {Boston, MA, USA},
+}
+
+@INPROCEEDINGS{zuchowski_asic_vs_fpga_cost,
+author={P. S. Zuchowski and C. B. Reynolds and R. J. Grupp and S. G. Davis and B. Cremen and B. Troxel},
+booktitle={IEEE/ACM International Conference on Computer Aided Design, 2002. ICCAD 2002.},
+title={A hybrid ASIC and FPGA architecture},
+year={2002},
+volume={},
+number={},
+pages={187-194},
+abstract={This paper introduces a new hybrid ASIC/FPGA chip architecture that is being developed in collaboration between IBM and Xilinx, and highlights some of the design challenges this offers for designers and CAD developers. We review recent data from both the ASIC and FPGA industries, including technology features, and trends in usage and costs. This background data indicates that there are advantages to using standard ASICs and FPGAs for many applications, but technical and financial considerations are increasingly driving the need for a hybrid ASIC/FPGA architecture at specific volume tiers and technology nodes. As we describe the hybrid chip architecture ,we point out evolving tool and methodology issues that will need to be addressed to enable customers to effectively design hybrid ASIC/FPGAs. The discussion highlights specific automation issues in the areas of logic partitioning, logic simulation, verification, timing, layout and test.},
+keywords={application specific integrated circuits;circuit CAD;circuit simulation;field programmable gate arrays;formal verification;hybrid integrated circuits;integrated circuit design;integrated circuit economics;integrated circuit modelling;integrated circuit testing;logic CAD;logic partitioning;logic simulation;logic testing;timing;ASIC/FPGA industries technology features/usage/cost trends;CAD tools;IC test;circuit layout;design methodology issues;hybrid ASIC/FPGA chip architecture;logic partitioning;logic simulation;technology nodes;timing;verification;volume tiers;Application specific integrated circuits;Collaboration;Digital signal processing;Field programmable gate arrays;Firewire;Flexible printed circuits;Logic design;Logic devices;Logic testing;Microelectronics},
+doi={10.1109/ICCAD.2002.1167533},
+ISSN={1092-3152},
+month={Nov},}
+
+@techreport{berten_gpu_fpga_comparison,
+     title = {{GPU vs FPGA Performance Comparison}},
+     address = {39002 Santander, Cantabria, Spain},
+     author = {BERTEN DSP S.L.},
+     year = {2016},
+     month = {May},
+     pages = {4},
+     contact = {berten@bertendsp.com},
+     url= {http://www.bertendsp.com/pdf/whitepaper/BWP001_GPU_vs_FPGA_Performance_Comparison_v1.0.pdf}
+}
