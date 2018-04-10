@@ -130,7 +130,7 @@
     {\fivecharsapprox}%
     {-1em \@plus -1ex \@minus -.2ex}%
     {1em \@plus .2ex}%
-    {\raggedright\hyphenpenalty=10000\normalfont\large\bfseries\MakeUppercase}}
+    {\raggedright\hyphenpenalty=10000\normalfont\MakeUppercase}}
 \makeatother
 
 
@@ -142,7 +142,7 @@
     {\fivecharsapprox}%
     {-1em \@plus -1ex \@minus -.2ex}%
     {1em \@plus .2ex}%
-    {\raggedright\hyphenpenalty=10000\normalfont\normalsize\bfseries}}
+    {\raggedright\hyphenpenalty=10000\normalfont\normalsize}}
 \makeatother
 
 
@@ -153,8 +153,9 @@
   \@startsection{subsubsection}{3}%
     {\fivecharsapprox}%
     {-1em \@plus -1ex \@minus -.2ex}%
-    {\z@}%
-    {\raggedright\hyphenpenalty=10000\normalfont\normalsize\bfseries}}
+    {1em \@plus .2ex}%
+    % {\z@}%
+    {\raggedright\hyphenpenalty=10000\normalfont\normalsize}}
 \makeatother
 
 % Зачем: для оформления введения и заключения, они должны быть выровнены по центру.
@@ -165,15 +166,23 @@
     {\z@}%
     {-1em \@plus -1ex \@minus -.2ex}%
     {1em \@plus .2ex}%
-    {\centering\hyphenpenalty=10000\normalfont\large\bfseries\MakeUppercase}%
+    {\centering\hyphenpenalty=10000\normalfont\MakeUppercase}%
     }
 \makeatother
 
+\usepackage{titlesec}
+\titleformat{\section}
+  {}{\textbf{\thesection}}{1em}{}
+\titleformat{\subsection}
+  {}{\textbf{\thesubsection}}{1em}{}
+\titleformat{\subsubsection}
+  {}{\textbf{\thesubsubsection}}{1em}{}
 
 
 % Зачем: Задает стиль библиографии
 % Почему: Пункт 2.8.6 Требований по оформлению пояснительной записки.
 \bibliographystyle{styles/belarus-specific-utf8gost780u}
+\setlength{\belowcaptionskip}{-10pt}
 
 
 % Зачем: Пакет для вставки картинок
@@ -209,7 +218,7 @@
 \DeclareCaptionLabelSeparator{stb}{~--~}
 \captionsetup{labelsep=stb}
 \captionsetup[figure]{labelformat=stbfigure,justification=centering}
-\captionsetup[table]{labelformat=stbtable,justification=raggedright}
+\captionsetup[table]{labelformat=stbtable,justification=raggedright,aboveskip=0pt}
 \renewcommand{\thesubfigure}{\asbuk{subfigure}}
 
 % Зачем: Окружения для оформления формул
