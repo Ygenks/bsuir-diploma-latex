@@ -3,8 +3,24 @@
 % Из руководства к PSCyr: "Во избежание проблем пакет PSCyr должен загружаться перед пакета-ми inputenc и babel".
 % Примечание: Требует шаманства при установке, инструкция http://plumbum-blog.blogspot.com/2010/06/miktex-28-pscyr-04d.html
 % http://blog.harrix.org/?p=444
-\usepackage{pscyr}
+% \usepackage{pscyr}
 
-% Зачем: Выбор внутренней TeX кодировки.
-\usepackage[T2A]{fontenc}
+% % Зачем: Выбор внутренней TeX кодировки.
+% \usepackage[T2A]{fontenc}
 
+\usepackage{fontspec}
+\usepackage{xunicode}
+\usepackage{xltxtra}
+
+
+\usepackage{polyglossia}                        % Поддержка многоязычности (fontspec подгружается автоматически)
+    \setmainlanguage[babelshorthands=true]{russian} % Язык по-умолчанию русский с поддержкой приятных команд пакета babel
+    \setotherlanguage{english}                      % Дополнительный язык = английский (в американской вариации по-умолчанию)
+    \setmonofont{Courier New} % моноширинный шрифт
+    \newfontfamily\cyrillicfonttt{Courier New}[Script = Cyrillic] % моноширинный шрифт для кириллицы
+    \defaultfontfeatures{Ligatures=TeX} % стандартные лигатуры TeX, замены нескольких дефисов на тире и т. п. Настройки моноширинного шрифта должны идти до этой строки, чтобы при врезках кода программ в коде не применялись лигатуры и замены дефисов
+    \setmainfont{Arial} % Основной шрифт
+    \newfontfamily\cyrillicfont{Times New Roman}[Script = Cyrillic] % Основной шрифт для кириллицы
+    \setsansfont{Times New Roman} % Шрифт без засечек
+    \newfontfamily\cyrillicfontsf{Arial}[Script = Cyrillic] % Шрифт без засечек для кириллицы
+    % \usepackage{unicode-math} %\setmathfont

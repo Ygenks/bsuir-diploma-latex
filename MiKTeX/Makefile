@@ -27,8 +27,11 @@ fast: *.tex
 	latexmk -pdf -pdflatex="pdflatex" $(DIPLOMA_REPORT_PDF)
 	# mv $(DIPLOMA_REPORT_PDF).pdf $(DIPLOMA_REPORT_PDF)-`date +'%m-%d-%H-%M-%S'`.pdf
 
+# practice: *.tex
+# 	latexmk -pdf -pdflatex="pdflatex" $(PRACTICE_REPORT_PDF)
+
 practice: *.tex
-	latexmk -pdf -pdflatex="pdflatex" $(PRACTICE_REPORT_PDF)
+	latexmk -xelatex $(PRACTICE_REPORT_PDF)
 
 fastcheck: *.tex
 	$(PDFLATEX) $(DIPLOMA_REPORT_PDF)

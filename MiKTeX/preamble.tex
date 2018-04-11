@@ -10,7 +10,7 @@
 
 % Рекомендовано для Linux (нужен scalable-cyrfonts-tex, подробности см. в fonts_linux.tex)
 % раскомментировать, чтобы использовать:
-\input{fonts_linux}% не забудьте закомментировать \input{fonts_windows}
+\input{fonts_windows}% не забудьте закомментировать \input{fonts_windows}
 
 % Зачем: Установка кодировки исходных файлов.
 \usepackage[utf8]{inputenc}
@@ -22,7 +22,8 @@
 \usepackage[warn]{mathtext}
 
 % Зачем: Учет особенностей различных языков.
-\usepackage[russian]{babel}
+% \usepackage[russian]{babel}
+
 
 % Зачем: Добавляет поддержу дополнительных размеров текста 8pt, 9pt, 10pt, 11pt, 12pt, 14pt, 17pt, and 20pt.
 % Почему: Пункт 2.1.1 Требований по оформлению пояснительной записки.
@@ -187,7 +188,8 @@
 
 % Зачем: Пакет для вставки картинок
 % Примечание: Объяснение, зачем final - http://tex.stackexchange.com/questions/11004/why-does-the-image-not-appear
-\usepackage[final]{graphicx}
+% \usepackage[final]{graphicx}
+\usepackage{graphicx}
 \DeclareGraphicsExtensions{.pdf,.png,.jpg,.eps}
 
 
