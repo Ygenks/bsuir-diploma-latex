@@ -248,3 +248,40 @@ MT9T031C12STCH ES компании Aptina. При разрешении 1280x720 
   \caption{ Схема подключения камеры \cite{camera_module_datasheet} }
   \label{fig:domain:camera:camera_configuration}
 \end{figure}
+
+
+% \subsection{Microblaze}
+% \label{sub:domain:microblaze}
+
+\subsection{Обзор аналогов}
+\label{sub:domain:alternatives}
+
+Системы обработки видео на FPGA получили распространение в конце 1990-ых годов, когда
+производство программируемой логики стало коммерчески выгодным. Работы делятся на несколько
+направлений: портирование алгоритмов ЦОС с последующими замерами времени выполнения,
+проектирование систем реального времени, создание систем обработки видео для встраиваемых систем.
+Данные системы, как правило, не обладают модульной архитектурой: попытка внесения изменений,
+например, добавление нового фильтра в цепочку обработки, требует изменения большей части
+составных блоков.
+К примеру, в работе \cite{meng_fpga_based_video_processing} разработанная система
+имеет линейную архитектуру, не предпологая наличия управляющей логики, что существенно сужает круг
+её применения. Архитектура линейной системы представлена на рисунке~\ref{fig:domain:alternatives:linear_architecture}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.35]{system_linear_architecture.png}
+  \caption{ Архитектура линейной системы обработки видео }
+  \label{fig:domain:alternatives:linear_architecture}
+\end{figure}
+
+Другие системы \cite{embeded_real_time_fpga_modular} разделяют управляющую
+и обрабатывающую логику, однако не поддерживают добавления блоков обработки в произвольное
+место в потоке данных(перед конвертацией видео во внутренний формат FPGA или после).
+Схема данной системы представлена на рисунке~\ref{fig:domain:alternatives:microblaze_architecture}
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[scale=0.37]{system_microblaze_architecture.png}
+  \caption{ Потоковая система обработки видео }
+  \label{fig:domain:alternatives:microblaze_architecture}
+\end{figure}
