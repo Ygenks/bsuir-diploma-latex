@@ -181,14 +181,19 @@ FPGA линейки Virtex являются самым передовым реш
   \label{fig:domain:ac701:block_design}
 \end{figure}
 
-SRAM микросхем FPGA не могут вместить полноразмерную фотографию, а тем более их поток, поэтому
-для временного хранения приходящих кадров необходима оперативная память. % Можно добавить ссылку на расчёты во введении или привести новые для 2160/1080
+Кадр HDTV видеопотока занимает порядка 1280 $\cdot$ 720 $\cdot$ 3 = 2,76 МБ памяти. Размер SRAM памяти
+микросхемы составляет 2,8 МБ, что позволяет буферизировать один кадр видеопотока. Однако большинство
+алгоритмов обработки изображений работают со буфером памяти, в котором сохраняются промежуточные результаты
+вычислений. Для таких целей объёма SRAM памяти становится недостаточно. Поэтому
+для временного хранения потока приходящих кадров необходима динамическая память.   % Можно добавить ссылку на расчёты во введении или привести новые для 2160/1080
 
 Программируемый осциллятор позволяет подключать к дополнительной периферии, например камере, тактовый сигнал произвольной частоты.
-Для задания опорной частоты используется шина I2C. Схема осциллятора представлена на рисунке~\ref{fig:domain:ac701:user_clock}
+Для задания опорной частоты используется шина I2C. Частота варьируется от 10 МГц до 810 МГц. Высокие частоты достигаются применением дифферециальной пары.
+Схема осциллятора представлена на рисунке~\ref{fig:domain:ac701:user_clock}
+
 \begin{figure}[ht]
   \centering
-  \includegraphics[scale=0.3]{ac701_user_clock.png}
+  \includegraphics[scale=0.25]{ac701_user_clock.png}
   \caption{ Программируемый осциллятор }
   \label{fig:domain:ac701:user_clock}
 \end{figure}
@@ -203,22 +208,24 @@ SRAM микросхем FPGA не могут вместить полноразм
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[scale=0.3]{ac701_i2c.png}
+  \includegraphics[scale=0.25]{ac701_i2c.png}
   \caption{ Топология шины I2C }
   \label{fig:domain:ac701:i2c}
 \end{figure}
 
 Обработанное видео передаётся через коннектор HDMI (High Definition Multimedia Interface) на устройство видеовывода либо дальнейшей обработки. В качестве
 HDMI контроллера на плате установлен ADV7511KSTZ-P компании Analog Devices. Контроллер поддерживает передачу видео формата 1080p 60 Гц в
-цветовом пространстве YCbCr 4:4:4, блоками по 24 бита. Более подробная информация содержится в \cite{adv7511_datasheet}.
+цветовом пространстве YCbCr 4:4:4, блоками по 24 бита.
 Схема подключения контроллера представлена на рисунке~\ref{fig:domain:ac701:hdmi}
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[scale=0.3]{ac701_hdmi.png}
+  \includegraphics[scale=0.28]{ac701_hdmi.png}
   \caption{ Схема подключения HDMI контроллера }
   \label{fig:domain:ac701:hdmi}
 \end{figure}
+
+Более подробная информация о подключении, назначении внутренних регистров и режимах работы содержится в \cite{adv7511_datasheet}.
 
 \subsection{Обзор камер}
 \label{sub:domain:camera}
@@ -244,12 +251,15 @@ MT9T031C12STCH ES компании Aptina. При разрешении 1280x720 
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[scale=0.25]{camera_configuration.png}
+  \includegraphics[scale=0.2]{camera_configuration.png}
   \caption{ Схема подключения камеры \cite{camera_module_datasheet} }
   \label{fig:domain:camera:camera_configuration}
 \end{figure}
 
-
+% Это чтобы не ехали подписи
+В качестве синхросигналов используется HSYNC и VSYNC, видеоданные передаются по 10-битной параллельной шине.
+Модуль поддерживает различные режимы работы, одним из которых является режим пропуска областей кадра, для
+уменьшения объёма передаваемых данных. Настройка камеры производится запиьсю внутренних регистров по протоколу I2C.
 % \subsection{Microblaze}
 % \label{sub:domain:microblaze}
 
@@ -270,7 +280,7 @@ MT9T031C12STCH ES компании Aptina. При разрешении 1280x720 
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[scale=0.35]{system_linear_architecture.png}
+  \includegraphics[scale=0.28]{system_linear_architecture.png}
   \caption{ Архитектура линейной системы обработки видео }
   \label{fig:domain:alternatives:linear_architecture}
 \end{figure}
@@ -282,7 +292,10 @@ MT9T031C12STCH ES компании Aptina. При разрешении 1280x720 
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[scale=0.37]{system_microblaze_architecture.png}
+  \includegraphics[scale=0.3]{system_microblaze_architecture.png}
   \caption{ Потоковая система обработки видео }
   \label{fig:domain:alternatives:microblaze_architecture}
 \end{figure}
+
+Набиолее удачным решением является комбинация линейной системы, поддерживающей интеграцию сторонних модулей в цепь обработки, и
+выделенного модуля управления, для настройки и отслеживания состояния систмы.
