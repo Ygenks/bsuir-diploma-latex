@@ -1,15 +1,22 @@
 \usepackage{fontspec}
-\usepackage{xunicode}
 \usepackage{xltxtra}
 
 
 \usepackage{polyglossia}
-    \setmainlanguage[babelshorthands=true]{russian}
-    \setotherlanguage{english}
-    \setmonofont{Courier New}
-    \newfontfamily\cyrillicfonttt{Courier New}[Script = Cyrillic]
-    \defaultfontfeatures{Ligatures=TeX}
-    \setmainfont{Arial}
-    \newfontfamily\cyrillicfont{Times New Roman}[Script = Cyrillic]
-    \setsansfont{Times New Roman}
-    \newfontfamily\cyrillicfontsf{Arial}[Script = Cyrillic]
+
+\setmainlanguage[babelshorthands=true]{russian}
+\setotherlanguage{english}
+\setmonofont{Courier New}
+\newfontfamily\cyrillicfonttt{Courier New}[Script = Cyrillic]
+\defaultfontfeatures{Ligatures=TeX}
+\setmainfont{Arial}
+\newfontfamily\cyrillicfont{Times New Roman}[Script = Cyrillic]
+\setsansfont{Times New Roman}
+\newfontfamily\cyrillicfontsf{Arial}[Script = Cyrillic]
+
+\newfontfamily\englishfontsf{Arial}[Script = Latin]
+\newfontfamily\englishfont{Times New Roman}[Script = Latin]
+\newfontfamily\englishfonttt{Courier New}[Script = Latin]
+
+
+\newcommand{\en}[1]{\foreignlanguage{english}{#1}}

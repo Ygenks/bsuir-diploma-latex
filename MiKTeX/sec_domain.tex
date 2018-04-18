@@ -7,7 +7,7 @@
 Современные методы обработки изображений делятся на две основные категории: программная и аппаратная обработка.
 
 Программная обработка производится на базе центрального процессора (CPU) и отличается высокой эффективностью
-при использовании последовательных алгоритмов \cite{asano_dip_comp}. В задачах с высоким Data Level Parallelism по обработке гомогенных данных
+при использовании последовательных алгоритмов \cite{asano_dip_comp}. В задачах с высоким \en{Data Level Parallelism} по обработке гомогенных данных
 центральный процессор значительно проигрывает более специализированным решениям,
 из-за малого количества SIMD блоков для параллельной обработки данных \cite{axell_cpu_simd}.
 
@@ -61,12 +61,12 @@ FPGA (Field Programmable Gate Array) --- программируемые поль
 
 Базовая структура FPGA приведена на рисунке~\ref{fig:domain:fpga:fpga_architecture}
 
-\begin{figure}[ht]
+\begin{center}
   \centering
   \includegraphics[scale=0.4]{ugrymov_fpga_artchitecture.png}
-  \caption{ Фрагмент базовой архитектуры FPGA \cite{ugrymov_digital_circuit_engineering} }
+  \captionof{figure}{ Фрагмент базовой архитектуры FPGA \cite{ugrymov_digital_circuit_engineering} }
   \label{fig:domain:fpga:fpga_architecture}
-\end{figure}
+\end{center}
 
 Конфигурируемые логические блоки состоят из:
 \begin{itemize}
@@ -75,14 +75,14 @@ FPGA (Field Programmable Gate Array) --- программируемые поль
   \item триггеров для хранения значений сигналов.
 \end{itemize}
 
-Схема современного КЛБ на примере семейства Spartan компании Xilinx представлена на рисунке~\ref{fig:domain:fpga:clb}
+Схема современного КЛБ на примере семейства Spartan компании \en{Xilinx} представлена на рисунке~\ref{fig:domain:fpga:clb}
 
-\begin{figure}[ht]
+\begin{center}
   \centering
   \includegraphics[scale=0.25]{ugrymov_fpga_clb.png}
-  \caption{ Логический блок семейсва Spartan }
+  \captionof{figure}{ Логический блок семейсва Spartan }
   \label{fig:domain:fpga:clb}
-\end{figure}
+\end{center}
 
 Системы межсоединений проектируются в широком диапазоне технологических и архитектурных решений.
 Основная цель при построении эффективной системы коммутации --- обеспечение максимальной коммутируемости блоков
@@ -92,12 +92,12 @@ FPGA (Field Programmable Gate Array) --- программируемые поль
 С каждым выводом микросхемы ассоциируется свой блок ввода-вывода, который может настраиваться как вход, выход или двунаправленный вывод.
 Упрощенная схема блока В/В представлена на рисунке~\ref{fig:domain:fpga:io}
 
-\begin{figure}[ht]
+\begin{center}
   \centering
   \includegraphics[scale=0.25]{ugrymov_fpga_io.png}
-  \caption{ Пример схемы блока ввода-вывода FPGA }
+  \captionof{figure}{ Пример схемы блока ввода-вывода FPGA }
   \label{fig:domain:fpga:io}
-\end{figure}
+\end{center}
 
 Блок разделен на две части для работы как на вход, так и на выход. Основной интерес представляют буферы с тремя состояниями
 1 и 2. Они имеют програмимруемые уровни сигналов(КМОП или ТТЛ), что заметно упрощает подключение пользовательских периферийных устройств
@@ -110,7 +110,7 @@ FPGA (Field Programmable Gate Array) --- программируемые поль
 Однако для проектирования и отладки системы важен выбор не только микросхемы,
 но и отладочной платы с необходимым набором периферии. Подробное сравнение отладочных
 плат с микросхемами последнего поколения от различных производителей показывает, что
-платы с микросхемами Xilinx наиболее разнообразы и представлены в более широком ценовом диапазоне,
+платы с микросхемами \en{Xilinx} наиболее разнообразы и представлены в более широком ценовом диапазоне,
 чем платы Altera \cite{fpga_boards_comparison}.
 Вследствие чего сделан выбор применения микросхем Xilinx в дипломном проекте.
 
@@ -160,7 +160,7 @@ FPGA линейки Virtex являются самым передовым реш
 \subsection{Обзор платы AC701}
 \label{sub:domain:ac701}
 
-Плата AC701 от компании Xilinx представляет собой так называемый evaluation board,
+Плата AC701 от компании Xilinx представляет собой так называемый \en{evaluation board},
 содержащую весь возможный набор периферийных устройств подключемых к микропроцессору.
 Среди них особый интерес представляют:
 \begin{itemize}
@@ -174,14 +174,14 @@ FPGA линейки Virtex являются самым передовым реш
 
 Стурктурная схема платы представлена на рисунке~\ref{fig:domain:ac701:block_design}
 
-\begin{figure}[ht]
+\begin{center}
   \centering
   \includegraphics[scale=0.4]{ac701_block_design.png}
-  \caption{ Блок схема платы AC701 }
+  \captionof{figure}{ Блок схема платы AC701 }
   \label{fig:domain:ac701:block_design}
-\end{figure}
+\end{center}
 
-Кадр HDTV видеопотока занимает порядка 1280 $\cdot$ 720 $\cdot$ 3 = 2,76 МБ памяти. Размер SRAM памяти
+Кадр HDTV видеопотока занимает порядка 1280 $\cdot$ 720 $\cdot$ 3 $=$ 2,76 МБ памяти. Размер SRAM памяти
 микросхемы составляет 2,8 МБ, что позволяет буферизировать один кадр видеопотока. Однако большинство
 алгоритмов обработки изображений работают со буфером памяти, в котором сохраняются промежуточные результаты
 вычислений. Для таких целей объёма SRAM памяти становится недостаточно. Поэтому
@@ -191,12 +191,12 @@ FPGA линейки Virtex являются самым передовым реш
 Для задания опорной частоты используется шина I2C. Частота варьируется от 10 МГц до 810 МГц. Высокие частоты достигаются применением дифферециальной пары.
 Схема осциллятора представлена на рисунке~\ref{fig:domain:ac701:user_clock}
 
-\begin{figure}[ht]
+\begin{center}
   \centering
   \includegraphics[scale=0.25]{ac701_user_clock.png}
-  \caption{ Программируемый осциллятор }
+  \captionof{figure}{ Программируемый осциллятор }
   \label{fig:domain:ac701:user_clock}
-\end{figure}
+\end{center}
 
 Подключение произвольных периферийных устройств осуществляется через разъём FMC, поддерживающий передачу
 выскочастотных дифференциальный и однополярных сигналов на частотах до 9 ГГц\cite[c. 57]{ac701_user_guide}.
@@ -206,24 +206,24 @@ FPGA линейки Virtex являются самым передовым реш
 инструментом настройки и диагностирования состояния компонентов на плате. Точный список устройств показан на
 рисунке~\ref{fig:domain:ac701:i2c}
 
-\begin{figure}[ht]
+\begin{center}
   \centering
   \includegraphics[scale=0.25]{ac701_i2c.png}
-  \caption{ Топология шины I2C }
+  \captionof{figure}{ Топология шины I2C }
   \label{fig:domain:ac701:i2c}
-\end{figure}
+\end{center}
 
-Обработанное видео передаётся через коннектор HDMI (High Definition Multimedia Interface) на устройство видеовывода либо дальнейшей обработки. В качестве
+Обработанное видео передаётся через коннектор HDMI (\en{High Definition Multimedia Interface}) на устройство видеовывода либо дальнейшей обработки. В качестве
 HDMI контроллера на плате установлен ADV7511KSTZ-P компании Analog Devices. Контроллер поддерживает передачу видео формата 1080p 60 Гц в
 цветовом пространстве YCbCr 4:4:4, блоками по 24 бита.
 Схема подключения контроллера представлена на рисунке~\ref{fig:domain:ac701:hdmi}
 
-\begin{figure}[ht]
+\begin{center}
   \centering
   \includegraphics[scale=0.28]{ac701_hdmi.png}
-  \caption{ Схема подключения HDMI контроллера }
+  \captionof{figure}{ Схема подключения HDMI контроллера }
   \label{fig:domain:ac701:hdmi}
-\end{figure}
+\end{center}
 
 Более подробная информация о подключении, назначении внутренних регистров и режимах работы содержится в \cite{adv7511_datasheet}.
 
@@ -249,12 +249,12 @@ MT9T031C12STCH ES компании Aptina. При разрешении 1280x720 
 может питаться напрямую от источника питания для платы без преобразований\cite{image_sensor_datasheet}.
 Схема подключения камеры представлена на рисунке~\ref{fig:domain:camera:camera_configuration}
 
-\begin{figure}[ht]
+\begin{center}
   \centering
-  \includegraphics[scale=0.2]{camera_configuration.png}
-  \caption{ Схема подключения камеры \cite{camera_module_datasheet} }
+  \includegraphics[scale=0.21]{camera_configuration.png}
+  \captionof{figure}{ Схема подключения камеры \cite{camera_module_datasheet} }
   \label{fig:domain:camera:camera_configuration}
-\end{figure}
+\end{center}
 
 % Это чтобы не ехали подписи
 В качестве синхросигналов используется HSYNC и VSYNC, видеоданные передаются по 10-битной параллельной шине.
@@ -278,24 +278,24 @@ MT9T031C12STCH ES компании Aptina. При разрешении 1280x720 
 имеет линейную архитектуру, не предпологая наличия управляющей логики, что существенно сужает круг
 её применения. Архитектура линейной системы представлена на рисунке~\ref{fig:domain:alternatives:linear_architecture}
 
-\begin{figure}[ht]
+\begin{center}
   \centering
   \includegraphics[scale=0.28]{system_linear_architecture.png}
-  \caption{ Архитектура линейной системы обработки видео }
+  \captionof{figure}{ Архитектура линейной системы обработки видео }
   \label{fig:domain:alternatives:linear_architecture}
-\end{figure}
+\end{center}
 
 Другие системы \cite{embeded_real_time_fpga_modular} разделяют управляющую
 и обрабатывающую логику, однако не поддерживают добавления блоков обработки в произвольное
 место в потоке данных(перед конвертацией видео во внутренний формат FPGA или после).
 Схема данной системы представлена на рисунке~\ref{fig:domain:alternatives:microblaze_architecture}
 
-\begin{figure}[ht]
+\begin{center}
   \centering
   \includegraphics[scale=0.3]{system_microblaze_architecture.png}
-  \caption{ Потоковая система обработки видео }
+  \captionof{figure}{ Потоковая система обработки видео }
   \label{fig:domain:alternatives:microblaze_architecture}
-\end{figure}
+\end{center}
 
 Набиолее удачным решением является комбинация линейной системы, поддерживающей интеграцию сторонних модулей в цепь обработки, и
 выделенного модуля управления, для настройки и отслеживания состояния систмы.
