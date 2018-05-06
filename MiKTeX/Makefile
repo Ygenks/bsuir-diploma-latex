@@ -23,12 +23,8 @@ publish_to_dropbox: all
 	cp $(DIPLOMA_REPORT_PDF).pdf $(DROPBOX_PUBLIC)/$(DIPLOMA_REPORT_PDF).pdf
 	cp $(PRACTICE_REPORT_PDF).pdf $(DROPBOX_PUBLIC)/$(PRACTICE_REPORT_PDF).pdf
 
-fast: *.tex
+diploma: *.tex
 	latexmk -xelatex $(DIPLOMA_REPORT_PDF)
-	# mv $(DIPLOMA_REPORT_PDF).pdf $(DIPLOMA_REPORT_PDF)-`date +'%m-%d-%H-%M-%S'`.pdf
-
-# practice: *.tex
-# 	latexmk -pdf -pdflatex="pdflatex" $(PRACTICE_REPORT_PDF)
 
 practice: *.tex
 	latexmk -xelatex $(PRACTICE_REPORT_PDF)
