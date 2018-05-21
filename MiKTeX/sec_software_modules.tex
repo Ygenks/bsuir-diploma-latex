@@ -6,6 +6,178 @@
 осуществляется при помощи микропроцессора MicroBlaze. Она делится
 на два множества: конфигурирование IP-блоков по протоколу AXI4-Lite и
 внешней периферии, такой как контроллер HDMI и CMOS-камера, посредством
-шины I2C.
+шины I2C. Рассмотрим подробнее часть функций.
 
-При разработке встраиваемых систем принято использовать
+
+Так как работа с контроллером HDMI происходит по протоколу I2C, то
+сперва необходимо задать адрес устройства контроллера на этой шине.
+Для этого необходимо проинициализировать блок AXI HDMI TX адресом контроллера,
+взаимодействие с блоком происходит по шине AXI4-Lite.
+Для этого вызывается библиотечная функция \texttt{HAL\_paltform\_init}, которая
+задаёт адрес на шине I2C и адрес устройства сброса.
+
+Для поддержки произвольного адреса контроллера на шине используется макроподстановка,
+результат которой зависит от того, объявлен ли произвольный адрес контроллера в файле
+BSP (\en{Board Support Package}):
+\medskip
+\begin{lstlisting}[style=C]
+#ifdef XPAR_AXI_IIC_0_BASEADDR
+	HAL_platform_init(XPAR_AXI_IIC_0_BASEADDR, XPAR_AXI_PSR_0_BASEADDR);
+#else
+  	HAL_platform_init(XPAR_AXI_IIC_MAIN_BASEADDR, XPAR_AXI_PSR_0_BASEADDR);
+#endif
+\end{lstlisting}
+\medskip
+
+После инициализации адреса контроллера необходимо рассчитать параметры
+частоты для блока AXI CLKGEN, который тактирует контроллер HDMI.
+Частота генериуемого тактового сигнала задаётся путём записи нужных
+значений в регистры блока управления тактовыми сигналами. Рассмотрим
+примитивы по работе с MMCM.
+
+Первым примитивом, необходимым для отслеживания состояния блока, является
+чтение из блока управления тактовыми сигналами. Так как работа с блоком происходит
+не напрямую, а через аппаратную прослойку, то чтение ргеистров происходит со смещением
+от адреса блока CLKGEN:
+\medskip
+\begin{lstlisting}[style=C]
+  static void read(unsigned long register, unsigned long *value)
+  {
+	*value = Xil_In32(CF_CLKGEN_BASEADDR + register);
+  }
+\end{lstlisting}
+\medskip
+
+Чтение производится по шине AXI4-Lite, а так как процессор MicroBlaze реализует
+отображение периферийных устройств в память, то чтение представляет собой не что иное,
+как разименование указателя, размером, равным разрядности шине данных:
+\medskip
+\begin{lstlisting}[style=C]
+  static INLINE u32 Xil_In32(UINTPTR Addr)
+  {
+	return *(volatile u32 *) Addr;
+  }
+\end{lstlisting}
+\medskip
+
+Определение \texttt{CF\_CLKGEN\_BASEADDR}, по аналогии с контроллером I2C, является
+стартовым адресом блока CLKGEN на шине AXI4-Lite.
+
+Примитив записи регистров выглядит схожим образом:
+\medskip
+\begin{lstlisting}[style=C]
+  static void write(unsigned long register, unsigned long value)
+  {
+	Xil_Out32(CF_CLKGEN_BASEADDR + register, value);
+  }
+\end{lstlisting}
+\medskip
+
+Запись значения в память раскрывается схожим образом, при этом
+заданный адрес выравнивается кратно размеру шины адреса, после
+чего происходит запись:
+\medskip
+\begin{lstlisting}[style=C]
+  static INLINE void Xil_Out32(UINTPTR Addr, u32 Value)
+  {
+	volatile u32 *LocalAddr = (volatile u32 *)Addr;
+	*LocalAddr = Value;
+  }
+\end{lstlisting}
+\medskip
+
+Примитивы чтения и записи не содержат логики обработки ошибок и не учитывают
+задержки при применении параметров для блока управления частоты. Поэтому
+необходимо обернуть примитивы управляющей логикой. Пример функции чтения
+значения регистра блока управления тактовыми сигналами:
+\medskip
+\begin{lstlisting}[style=C]
+  static int mmcm_read(unsigned int reg, unsigned int *val)
+  {
+	unsigned int reg_val;
+	int ret;
+
+	ret = wait_non_busy(axi_clkgen);
+	if (ret < 0) {
+      return ret;
+    }
+
+	reg_val = AXI_CLKGEN_V2_DRP_CNTRL_SEL | AXI_CLKGEN_V2_DRP_CNTRL_READ;
+	reg_val |= (reg << 16);
+
+	write(AXI_CLKGEN_V2_REG_DRP_CNTRL, reg_val);
+
+	ret = wait_non_busy(axi_clkgen);
+	if (ret < 0) {
+      return ret;
+    }
+
+	*val = ret;
+
+	return 0;
+  }
+\end{lstlisting}
+\medskip
+
+Чтение значения происходит до истечения программного таймаута, так как
+конфигурация выполняется единожды, из-за чего нет необходимости использовать
+таймеры. Истечение таймаута может говорить о занятости устройства или аварийном статусе.
+При чтении, необходимо считать статус блока управления тактовыми сигналами,
+так как тот может быть заблокирован для модификации, например во время смены частоты.
+Затем происходит запись управляющих регистров, для выбора канала в MMCM. В данном
+случае используется нулевой канал. После чего происходит чтение значения регистра данного
+канала.
+
+Запись значения в регистры происходит следующим образом:
+\medskip
+\begin{lstlisting}[style=C]
+  static int mmcm_write(unsigned int reg, unsigned int val, unsigned int mask)
+  {
+	unsigned int reg_val = 0;
+	int ret;
+
+	ret = wait_non_busy(axi_clkgen);
+	if (ret < 0) {
+      return ret;
+    }
+
+	if (mask != 0xffff) {
+      mmcm_read(reg, &reg_val);
+      reg_val &= ~mask;
+	}
+
+	reg_val |= AXI_CLKGEN_V2_DRP_CNTRL_SEL | (reg << 16) | (val & mask);
+
+	write(AXI_CLKGEN_V2_REG_DRP_CNTRL, reg_val);
+
+	return 0;
+  }
+\end{lstlisting}
+\medskip
+
+Функция \texttt{wait\_non\_busy} обеспечивает обнаружение окна доступа к устройству,
+возвращая управление, когда блок готов принимать и передавать данные:
+\medskip
+\begin{lstlisting}[style=C]
+  static int wait_non_busy(struct axi_clkgen *axi_clkgen)
+  {
+	unsigned int timeout = 10000;
+	unsigned int val;
+
+	do {
+      read(AXI_CLKGEN_V2_REG_DRP_STATUS, &val);
+	} while ((val & AXI_CLKGEN_V2_DRP_STATUS_BUSY) && --timeout);
+
+	if (val & AXI_CLKGEN_V2_DRP_STATUS_BUSY)
+    return -EIO;
+
+	return val & 0xffff;
+  }
+\end{lstlisting}
+\medskip
+
+Для настройки необходимой частоты требуется задать канал MMCM, на котором
+будет сгенерирован сигнал, делитель частоты для данного канала, указать
+фильтры, которые будут применены к сгенерированному сигналу, а также
+записать, при каких значениях модуль генерации тактовых сигналов
+зафиксирует параметры сгенерированной частоты. Функция
