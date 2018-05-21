@@ -180,4 +180,264 @@ BSP (\en{Board Support Package}):
 будет сгенерирован сигнал, делитель частоты для данного канала, указать
 фильтры, которые будут применены к сгенерированному сигналу, а также
 записать, при каких значениях модуль генерации тактовых сигналов
-зафиксирует параметры сгенерированной частоты. Функция
+зафиксирует параметры сгенерированной частоты. Функция \texttt{set\_rate}:
+\medskip
+\begin{lstlisting}[style=C]
+  static int set_rate(struct clk_hw *clk_hw, unsigned long rate, unsigned long parent_rate)
+  {
+    *axi_clkgen = clk_hw_to_axi_clkgen(clk_hw);
+	unsigned int d, m, dout;
+	unsigned int nocount;
+	unsigned int high;
+	unsigned int edge;
+	unsigned int low;
+	uint32_t filter;
+	uint32_t lock;
+
+	if (parent_rate == 0 || rate == 0)
+    return -EINVAL;
+
+	CLKGEN_calc_params(parent_rate, rate, &d, &m, &dout);
+
+	if (d == 0 || dout == 0 || m == 0)
+    return -EINVAL;
+
+	filter = lookup_filter(m - 1);
+	lock = lookup_lock(m - 1);
+
+	CLKGEN_calc_clk_params(dout, &low, &high, &edge, &nocount);
+	mmcm_write(MMCM_REG_CLKOUT0_1, (high << 6) | low, 0xefff);
+	mmcm_write(MMCM_REG_CLKOUT0_2, (edge << 7) | (nocount << 6), 0x03ff);
+
+	CLKGEN_calc_clk_params(d, &low, &high, &edge, &nocount);
+	mmcm_write(MMCM_REG_CLK_DIV,
+    (edge << 13) | (nocount << 12) | (high << 6) | low, 0x3fff);
+
+	CLKGEN_calc_clk_params(m, &low, &high, &edge, &nocount);
+	mmcm_write(MMCM_REG_CLK_FB1,
+    (high << 6) | low, 0xefff);
+	mmcm_write(MMCM_REG_CLK_FB2,
+    (edge << 7) | (nocount << 6), 0x03ff);
+
+	mmcm_write(MMCM_REG_LOCK1, lock & 0x3ff, 0x3ff);
+	mmcm_write(MMCM_REG_LOCK2,
+    (((lock >> 16) & 0x1f) << 10) | 0x1, 0x7fff);
+	mmcm_write(MMCM_REG_LOCK3,
+    (((lock >> 24) & 0x1f) << 10) | 0x3e9, 0x7fff);
+	mmcm_write(MMCM_REG_FILTER1, filter >> 16, 0x9900);
+	mmcm_write(MMCM_REG_FILTER2, filter, 0x9900);
+
+	return 0;
+  }
+\end{lstlisting}
+\medskip
+
+Расчёт параметров производится библиотечными функциями блока генерации тактовых сигналов.
+Передаваемые значения коэффициента фильтрации и частоты вычисляется путём обхода таблицы коэффициентов.
+Запись предельных значений для частоты производится путём сдвига рассчитанного значения,
+с применением маски, т.к. за определённые параметры отвечает не целый регистр, а группа бит,
+в которое нужно сместить полученное значение.
+
+Настройка ядра AXI HDMI TX происходит с использованием библиотеки от производителя контроллера,
+так как включает примитивы по работе с контроллером HDMI по протоколу I2C.
+Для удобства при инициализации сложного устройства используется структура, содержащая
+все конфигурируемые параметры. Инициализация блока включает в себя аппаратную и программную часть, и
+начинается с установки параметров работы устройства:
+\medskip
+\begin{lstlisting}[style=C]
+  ATV_ERR init_transmitter()
+  {
+    last_detected_mode = MODE_INVALID;
+
+    trasmitter.changed = TRUE;
+    trasmitter.mode = MODE_NONE;
+    trasmitter.req_output_mode = OUT_MODE_HDMI;
+    trasmitter.bits_per_color = 8;
+    trasmitter.format = SDR_444_SEP_SYNC;
+    trasmitter.pixel_style = 2;
+    trasmitter.alignment = ALIGN_RIGHT;
+    trasmitter.pixel_encoding = OUT_ENC_YUV_444;
+    trasmitter.in_color_space = TX_CS_RGB;
+    trasmitter.out_color_space = TX_CS_RGB;
+    trasmitter.audio_interface = TX_SPDIF;
+    trasmitter.debug = true;
+
+    mute = MUTE_ENABLE;
+
+    software_init();
+    hardware_init();
+
+    return ATVERR_OK;
+  }
+\end{lstlisting}
+\medskip
+
+Данная функция задаёт цветовое пространство входного и выходного потока,
+количество бит на канал, кодировку изображения, количество передаваемых
+пикселей за такт. После чего выполняется программная и аппаратная инициализация.
+
+
+Программная инициализация состоит из зануления структуры, которая используется
+передатчиком для хранения текущего состояния:
+\medskip
+\begin{lstlisting}[style=C]
+  void software_init()
+  {
+    memset(&(tx_status), 0, sizeof(TX_STATUS_PKT));
+
+    tx_status.Hpd        = false;
+    tx_status.Msen       = false;
+  }
+\end{lstlisting}
+\medskip
+
+Аппаратная инициализация производит запись значений структуры с конфигурационными
+параметрами в устройство средствами библиотеки, так же активируя режим
+TMDS (\en{Transition-minimized differential signaling}), используемый протоколами
+DVI и HDMI для уменьшения помех в сигнале, путём применения дифференциальных сигналов
+и избыточного кодирования \en{8b/10b}. Отключается звуковой канал, так как он не
+используется в проекте.
+\medskip
+\begin{lstlisting}[style=C]
+  void hardware_init()
+  {
+    HAL_enable_tx_hpd(true);
+
+    ADIAPI_TxInit(true);
+
+    ADIAPI_TxEnableTmds(true, true);
+
+    ADIAPI_TxSetAvmute(TX_AVMUTE_OFF);
+    ADIAPI_TransmitterSetMuteState();
+
+    ADIAPI_TxSetOutputMode(trasmitter.req_output_mode);
+
+    ADIAPI_TxSetInputPixelFormat(transmitter.bits_per_color,
+    trasmitter.format,
+    trasmitter.pixel_style,
+    trasmitter.alignment,
+    false,
+    false);
+
+    ADIAPI_TxSetOutputPixelFormat(trasmitter.out_pixel_format, true);
+
+    ADIAPI_TxSetCSC(trasmitter.in_color_space, trasmitter.out_color_space);
+
+    ADIAPI_TxSetAudioInterface(trasmitter.audio_interface, AUD_SAMP_PKT, true);
+
+    ADIAPI_TxSetEnabledEvents(TX_EVENT_ALL_EVENTS, false);
+    ADIAPI_TxSetEnabledEvents(
+    (TX_EVENT)(TX_EVENT_HPD_CHG | TX_EVENT_MSEN_CHG | TX_EVENT_EDID_READY),
+    true);
+
+    ADIAPI_TxEnablePackets(PKT_AV_INFO_FRAME, true);
+  }
+\end{lstlisting}
+\medskip
+
+Конфигурация VDMA осщуествляется функцией \texttt{init\_vdma},
+которая сбрасывает конечный автомат блока в стартовое состояние. После сброса
+осуществляется поиск конфигурационного файла, экспортированного при создании битстрима.
+Конфигурация содержит значения включенных параметров блока. В случае успешного поиска
+происходит считывание конфигурационного файла. Для установки количества кадров в секунду,
+считанных и записанных VDMA используются счётчики кадров. Тело функции \texttt{init\_vdma}:
+\medskip
+\begin{lstlisting}[style=C]
+  int run_triple_frame_buffer(XAxiVdma* InstancePtr, int DeviceId, int hsize,
+		int vsize, int buf_base_addr, int number_frame_count,
+		int enable_frm_cnt_intr)
+        {
+          int Status,i;
+          XAxiVdma_Config *Config;
+          XAxiVdma_FrameCounter FrameCfgPtr;
+
+          /* This is one time initialization of state machine context.
+          * In first call it will be done for all VDMA instances in the system.
+          */
+          if(context_init==0) {
+            for(i=0; i < XPAR_XAXIVDMA_NUM_INSTANCES; i++) {
+              vdma_context[i].InstancePtr = NULL;
+              vdma_context[i].device_id = -1;
+              vdma_context[i].hsize = 0;
+              vdma_context[i].vsize = 0;
+              vdma_context[i].init_done = 0;
+              vdma_context[i].buffer_address = 0;
+              vdma_context[i].enable_frm_cnt_intr = 0;
+              vdma_context[i].number_of_frame_count = 0;
+
+            }
+            context_init = 1;
+          }
+
+          /* The below initialization will happen for each VDMA. The API argument
+          * will be stored in internal data structure
+          */
+
+          /* The information of the XAxiVdma_Config comes from hardware build.
+          * The user IP should pass this information to the AXI DMA core.
+          */
+          Config = XAxiVdma_LookupConfig(DeviceId);
+          if (!Config) {
+            xil_printf("No video DMA found for ID %d\r\n",DeviceId );
+            return XST_FAILURE;
+          }
+
+          if(vdma_context[DeviceId].init_done ==0) {
+            vdma_context[DeviceId].InstancePtr = InstancePtr;
+
+            /* Initialize DMA engine */
+            Status = XAxiVdma_CfgInitialize(vdma_context[DeviceId].InstancePtr,
+            Config, Config->BaseAddress);
+            if (Status != XST_SUCCESS) {
+              xil_printf("Configuration Initialization failed %d\r\n",
+              Status);
+              return XST_FAILURE;
+            }
+
+            vdma_context[DeviceId].init_done = 1;
+          }
+
+          vdma_context[DeviceId].device_id = DeviceId;
+          vdma_context[DeviceId].vsize = vsize;
+
+          vdma_context[DeviceId].buffer_address = buf_base_addr;
+          vdma_context[DeviceId].enable_frm_cnt_intr = enable_frm_cnt_intr;
+          vdma_context[DeviceId].number_of_frame_count = number_frame_count;
+          vdma_context[DeviceId].hsize = hsize * (Config->Mm2SStreamWidth>>3);
+
+          /* Setup the write channel */
+          Status = WriteSetup(&vdma_context[DeviceId]);
+          if (Status != XST_SUCCESS) {
+            xil_printf("Write channel setup failed %d\r\n", Status);
+            if(Status == XST_VDMA_MISMATCH_ERROR)
+			xil_printf("DMA Mismatch Error\r\n");
+            return XST_FAILURE;
+          }
+
+          /* The frame counter interrupt is enabled, setting VDMA for same */
+          if(vdma_context[DeviceId].enable_frm_cnt_intr) {
+            FrameCfgPtr.WriteDelayTimerCount = 1;
+            FrameCfgPtr.WriteFrameCount = number_frame_count;
+
+            XAxiVdma_SetFrameCounter(vdma_context[DeviceId].InstancePtr,&FrameCfgPtr);
+            /* Enable DMA read and write channel interrupts. The configuration for interrupt
+            * controller will be done by application	 */
+            XAxiVdma_IntrEnable(vdma_context[DeviceId].InstancePtr,
+            XAXIVDMA_IXR_ERROR_MASK |
+            XAXIVDMA_IXR_FRMCNT_MASK,XAXIVDMA_WRITE);
+            XAxiVdma_IntrEnable(vdma_context[DeviceId].InstancePtr,
+            XAXIVDMA_IXR_ERROR_MASK |
+            XAXIVDMA_IXR_FRMCNT_MASK,XAXIVDMA_READ);
+          } else	{
+            /* Enable DMA read and write channel interrupts. The configuration for interrupt
+            * controller will be done by application	 */
+            XAxiVdma_IntrEnable(vdma_context[DeviceId].InstancePtr,
+            XAXIVDMA_IXR_ERROR_MASK,XAXIVDMA_WRITE);
+            XAxiVdma_IntrEnable(vdma_context[DeviceId].InstancePtr,
+            XAXIVDMA_IXR_ERROR_MASK ,XAXIVDMA_READ);
+          }
+
+          return XST_SUCCESS;
+        }
+\end{lstlisting}
+\medskip
