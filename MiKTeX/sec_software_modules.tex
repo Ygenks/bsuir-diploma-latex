@@ -48,7 +48,7 @@ BSP (\en{Board Support Package}):
 \end{lstlisting}
 \medskip
 
-Чтение производится по шине AXI4-Lite, а так как процессор MicroBlaze реализует
+Чтение производится по шине AXI4-Lite, а так как микропроцессор реализует
 отображение периферийных устройств в память, то чтение представляет собой не что иное,
 как разименование указателя, размером, равным разрядности шине данных:
 \medskip
@@ -60,8 +60,8 @@ BSP (\en{Board Support Package}):
 \end{lstlisting}
 \medskip
 
-Определение \texttt{CF\_CLKGEN\_BASEADDR}, по аналогии с контроллером I2C, является
-стартовым адресом блока CLKGEN на шине AXI4-Lite.
+Определение \texttt{CF\_CLKGEN\_BASEADDR}, по аналогии с определениями для
+контроллера I2C, является стартовым адресом блока CLKGEN на шине AXI4-Lite.
 
 Примитив записи регистров выглядит схожим образом:
 \medskip
@@ -340,104 +340,150 @@ DVI и HDMI для уменьшения помех в сигнале, путём
 осуществляется поиск конфигурационного файла, экспортированного при создании битстрима.
 Конфигурация содержит значения включенных параметров блока. В случае успешного поиска
 происходит считывание конфигурационного файла. Для установки количества кадров в секунду,
-считанных и записанных VDMA используются счётчики кадров. Тело функции \texttt{init\_vdma}:
+считанных и записанных VDMA используются счётчики кадров. Тело функции приведено ниже:
 \medskip
 \begin{lstlisting}[style=C]
-  int run_triple_frame_buffer(XAxiVdma* InstancePtr, int DeviceId, int hsize,
-		int vsize, int buf_base_addr, int number_frame_count,
-		int enable_frm_cnt_intr)
-        {
-          int Status,i;
-          XAxiVdma_Config *Config;
-          XAxiVdma_FrameCounter FrameCfgPtr;
+  int init_vdma(XAxiVdma* instance, int device_id)
+  {
+    XAxiVdma_Config* config;
+    XAxiVdma_FrameCounter frame_config;
 
-          /* This is one time initialization of state machine context.
-          * In first call it will be done for all VDMA instances in the system.
-          */
-          if(context_init==0) {
-            for(i=0; i < XPAR_XAXIVDMA_NUM_INSTANCES; i++) {
-              vdma_context[i].InstancePtr = NULL;
-              vdma_context[i].device_id = -1;
-              vdma_context[i].hsize = 0;
-              vdma_context[i].vsize = 0;
-              vdma_context[i].init_done = 0;
-              vdma_context[i].buffer_address = 0;
-              vdma_context[i].enable_frm_cnt_intr = 0;
-              vdma_context[i].number_of_frame_count = 0;
+    if (context_init == 0) {
+      for (int i = 0; i < XPAR_XAXIVDMA_NUM_INSTANCES; i++) {
+        vdma_cores[i].instance = NULL;
+        vdma_cores[i].device_id = -1;
+        vdma_cores[i].hsize = 0;
+        vdma_cores[i].vsize = 0;
+        vdma_cores[i].init_done = 0;
+        vdma_cores[i].buffer_address = 0;
+        vdma_cores[i].enable_frm_cnt_intr = 0;
+        vdma_cores[i].number_of_frame_count = 0;
+      }
+      context_init = 1;
+    }
+    config = XAxiVdma_LookupConfig(device_id);
+    if (!config) {
+      xil_printf("No video DMA found for ID %d\n", device_id);
+      return XST_FAILURE;
+    }
 
-            }
-            context_init = 1;
-          }
+    if (vdma_cores[device_id].init_done == 0) {
+      vdma_cores[device_id].instance = instance;
 
-          /* The below initialization will happen for each VDMA. The API argument
-          * will be stored in internal data structure
-          */
+      int status = XAxiVdma_CfgInitialize(vdma_cores[device_id].instance,
+      config, config->BaseAddress);
+      if (status != XST_SUCCESS) {
+        xil_printf("Configuration Initialization failed %d\n",
+        status);
+        return XST_FAILURE;
+      }
 
-          /* The information of the XAxiVdma_Config comes from hardware build.
-          * The user IP should pass this information to the AXI DMA core.
-          */
-          Config = XAxiVdma_LookupConfig(DeviceId);
-          if (!Config) {
-            xil_printf("No video DMA found for ID %d\r\n",DeviceId );
-            return XST_FAILURE;
-          }
+      vdma_cores[device_id].init_done = 1;
+    }
 
-          if(vdma_context[DeviceId].init_done ==0) {
-            vdma_context[DeviceId].InstancePtr = InstancePtr;
+    vdma_cores[device_id].device_id = device_id;
+    vdma_cores[device_id].vsize = vsize;
 
-            /* Initialize DMA engine */
-            Status = XAxiVdma_CfgInitialize(vdma_context[DeviceId].InstancePtr,
-            Config, Config->BaseAddress);
-            if (Status != XST_SUCCESS) {
-              xil_printf("Configuration Initialization failed %d\r\n",
-              Status);
-              return XST_FAILURE;
-            }
+    vdma_cores[device_id].buffer_address = buf_base_addr;
+    vdma_cores[device_id].enable_frm_cnt_intr = enable_frm_cnt_intr;
+    vdma_cores[device_id].number_of_frame_count = number_frame_count;
+    vdma_cores[device_id].hsize = hsize * (config->Mm2SStreamWidth >> 3);
 
-            vdma_context[DeviceId].init_done = 1;
-          }
+    status = setup_write_channel(&vdma_cores[device_id]);
+    if (status != XST_SUCCESS) {
+      xil_printf("Write channel setup failed %d\n", status);
+      if (status == XST_VDMA_MISMATCH_ERROR)
+      xil_printf("DMA mismatch error\n");
+      return XST_FAILURE;
+    }
 
-          vdma_context[DeviceId].device_id = DeviceId;
-          vdma_context[DeviceId].vsize = vsize;
+    frame_config.WriteDelayTimerCount = 1;
+    frame_config.WriteFrameCount = number_frame_count;
 
-          vdma_context[DeviceId].buffer_address = buf_base_addr;
-          vdma_context[DeviceId].enable_frm_cnt_intr = enable_frm_cnt_intr;
-          vdma_context[DeviceId].number_of_frame_count = number_frame_count;
-          vdma_context[DeviceId].hsize = hsize * (Config->Mm2SStreamWidth>>3);
+    XAxiVdma_SetFrameCounter(vdma_cores[device_id].instance, &frame_config);
 
-          /* Setup the write channel */
-          Status = WriteSetup(&vdma_context[DeviceId]);
-          if (Status != XST_SUCCESS) {
-            xil_printf("Write channel setup failed %d\r\n", Status);
-            if(Status == XST_VDMA_MISMATCH_ERROR)
-			xil_printf("DMA Mismatch Error\r\n");
-            return XST_FAILURE;
-          }
+    return XST_SUCCESS;
+  }
+\end{lstlisting}
+\medskip
 
-          /* The frame counter interrupt is enabled, setting VDMA for same */
-          if(vdma_context[DeviceId].enable_frm_cnt_intr) {
-            FrameCfgPtr.WriteDelayTimerCount = 1;
-            FrameCfgPtr.WriteFrameCount = number_frame_count;
+В процессе инициализации DMA задаются параметры для интерфейса AXI-Stream to
+AXI4, при помощи которого производится запись видеопотока в память. Для
+хранения настроек используется структура \texttt{vdma}, которая хранит
+все параметры блока. Одним из полей структуры является библиотечная
+структура \texttt{XAxiVdma\_DmaSetup}, при помощи которой можно
+задать параметры канала чтения и записи раздельно. Запись параметров
+производится следующей функцией:
+\medskip
+\begin{lstlisting}[style=C]
+  static int setup_write(vdma_handler* vmda)
+  {
+    vdma->write_config.vsize = vdma->vsize;
+    vdma->write_config.hsize = vdma->hsize;
 
-            XAxiVdma_SetFrameCounter(vdma_context[DeviceId].InstancePtr,&FrameCfgPtr);
-            /* Enable DMA read and write channel interrupts. The configuration for interrupt
-            * controller will be done by application	 */
-            XAxiVdma_IntrEnable(vdma_context[DeviceId].InstancePtr,
-            XAXIVDMA_IXR_ERROR_MASK |
-            XAXIVDMA_IXR_FRMCNT_MASK,XAXIVDMA_WRITE);
-            XAxiVdma_IntrEnable(vdma_context[DeviceId].InstancePtr,
-            XAXIVDMA_IXR_ERROR_MASK |
-            XAXIVDMA_IXR_FRMCNT_MASK,XAXIVDMA_READ);
-          } else	{
-            /* Enable DMA read and write channel interrupts. The configuration for interrupt
-            * controller will be done by application	 */
-            XAxiVdma_IntrEnable(vdma_context[DeviceId].InstancePtr,
-            XAXIVDMA_IXR_ERROR_MASK,XAXIVDMA_WRITE);
-            XAxiVdma_IntrEnable(vdma_context[DeviceId].InstancePtr,
-            XAXIVDMA_IXR_ERROR_MASK ,XAXIVDMA_READ);
-          }
+    vdma->write_config.stride = vdma->hsize;
+    vdma->write_config.frame_delay = false;
 
-          return XST_SUCCESS;
-        }
+    vdma->write_config.enable_circular_buf = true;
+    vdma->write_config.enable_sync = false;
+
+    vdma->write_config.point_num = false;
+    vdma->write_config.enable_frame_counter = false;
+
+    vdma->write_config.fixed_frame_store_addr = false;
+
+    int status = XAxiVdma_DmaConfig(vdma->instance, XAXIVDMA_WRITE, &vdma->write_config);
+    if (status != XST_SUCCESS) {
+      xil_printf("Writing config failed %d\n", status);
+      return status;
+    }
+
+    u32 addr = vdma->buffer_address;
+
+    for (int i = 0; i < vdma->instance->max_frames; i++) {
+      vdma->write_config.frame_store_start_addr[i] = addr;
+      addr += (vdma->hsize * vdma->vsize);
+    }
+
+    status = XAxiVdma_DmaSetBufferaddr(vdma->instance,
+    XAXIVDMA_WRITE,
+    vdma->write_config.frame_store_start_addr);
+    if (status != XST_SUCCESS) {
+      xil_printf("Setting buffer address failed %d\n", status);
+      return XST_FAILURE;
+    }
+
+    return XST_SUCCESS;
+  }
+\end{lstlisting}
+\medskip
+
+Настройка канала чтения происходит аналогичным образом, при это меняется ряд параметров
+и добавляется параметр кадровой синхронизации.
+
+Запуск чтения и записи осуществляется функцей \texttt{start\_transfer}, которая
+передаёт команду на запуск и проверяет код возврата начала операции:
+\medskip
+\begin{lstlisting}[style=C]
+  static int start_transfer(XAxiVdma *vdma)
+  {
+	int status;
+
+	status = XAxiVdma_DmaStart(vmda, XAXIVDMA_WRITE);
+	if (status != XST_SUCCESS) {
+      xil_printf("Start Write transfer failed %d\n", status);
+
+      return XST_FAILURE;
+	}
+
+	status = XAxiVdma_DmaStart(vmda, XAXIVDMA_READ);
+	if (status != XST_SUCCESS) {
+      xil_printf("Start read transfer failed %d\n", status);
+
+      return XST_FAILURE;
+	}
+
+	return XST_SUCCESS;
+  }
 \end{lstlisting}
 \medskip
