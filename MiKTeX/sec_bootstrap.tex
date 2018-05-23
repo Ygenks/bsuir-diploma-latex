@@ -140,7 +140,7 @@
 
 \begin{center}
   \centering
-  \includegraphics[scale=0.18]{io_planning.png}
+  \includegraphics[scale=0.17]{io_planning.png}
   \captionof{figure}{Планировка назначения выводов микросхемы}
   \label{fig:bootstrap:compilation:io_planning}
 \end{center}
@@ -151,3 +151,47 @@
 
 \subsection{Запуск на отладочной плате}
 \label{sec:bootstrap:board}
+
+Далее будет описываться последовательность действий для отладочной платы
+AC701. Для подготовки платы требуется выполнить следующие действия:
+\begin{itemize}
+  \item включить блок питания в сеть и подключить разъём к плате;
+  \item подключить \en{Micro-USB} к соответствующему разъёму;
+  \item подключить \en{Mini-USB} к конвертеру \en{USB to JTAG};
+  \item перевести движковый переключатель питания в положение \en{On}.
+\end{itemize}
+
+После загорания на плате индикаторных светодиодов необходимо загрузить
+битстрим и экспортировать аппаратную конфигурацию для последующего
+применения в SDK.
+
+Для загрузки битстрима необходимо нажать кнопку \en{Open Target},
+после чего выбрать отладочную плату и начать загрузку. Экспорт
+аппаратной конфигурации осуществляется в меню \en{File:Export:Export Hardware},
+с выставленной опцией \en{Include Bitstream}.
+
+После экспортирования конфигурации требуется запустить SDK из меню \en{File}.
+Импорт проекта осуществляется в окне \en{Open Projects from File System} в меню \en{File}.
+После успешного импорта проекта необходимо нажать пункт \en{Run Configurations} и
+указать настройки согласно рисунку~\ref{fig:bootstrap:compilation:run_configuration}
+
+\begin{center}
+  \centering
+  \includegraphics[scale=0.12]{run_configuration.png}
+  \captionof{figure}{Конфигурация запуска}
+  \label{fig:bootstrap:compilation:run_configuration}
+\end{center}
+
+После указания настроек для конфигурации запуска требуется нажать кнопку \en{Program FPGA},
+указать настройки согласно рисунку~\ref{fig:bootstrap:compilation:program_fpga} и нажать
+\en{Program}.
+
+\begin{center}
+  \centering
+  \includegraphics[scale=0.18]{program_fpga.png}
+  \captionof{figure}{Загрузка битстрима в FPGA}
+  \label{fig:bootstrap:compilation:program_fpga}
+\end{center}
+
+Для запуска проекта, в случае успешной загрузки битстрима, требуется нажать кнопку \en{Run} и
+дождаться окончания сборки.
