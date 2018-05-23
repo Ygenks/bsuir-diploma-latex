@@ -94,3 +94,60 @@
 
 Сборка проекта делится на несколько этапов, каждый из которых зависит от успешного
 результата предыдущего.
+
+На этапе синтеза HDL код переводится на уровень RTL (\en{Register Transfer Level}).
+При наличии несинтезируемых конструкций в коде синтез прерывается с ошибкой. На этапе
+синтеза присутствует возможность перезадать \en{constraints}, сменить метод синтеза и
+просмотреть синтезированную схему. Пример синтезированной схемы представлен
+на рисунке~\ref{fig:bootstrap:compilation:synthesis_result}
+
+\begin{center}
+  \centering
+  \includegraphics[scale=0.2]{synthesis_result.png}
+  \captionof{figure}{Пример синтезированной схемы}
+  \label{fig:bootstrap:compilation:synthesis_result}
+\end{center}
+
+Запуск синтеза производится соответствующим пунктом \en{Flow Navigator}. Блок работы с
+синтезом представлен на рисунке~\ref{fig:bootstrap:compilation:synthesis_menu}
+
+\begin{center}
+  \centering
+  \includegraphics[scale=0.2]{synthesis_menu.png}
+  \captionof{figure}{Блок работы с синтезом}
+  \label{fig:bootstrap:compilation:synthesis_menu}
+\end{center}
+
+На этапе имплементации происходит реализация синтезированной схемы на логических блоках FPGA.
+При этом каждому синтезированному блоку назначается КЛБ микросхемы, после назначения происходит
+проводка маршрутов по трассам межсоединений. Алгоритмы имплементации занимаются поиском первого
+подходящего по ограничения результата, а не лучшего среди нескольких кандидатов. Поэтому доведение
+имплементации происходит путём модификации ограничений, подгоняя ограничения под различные случаи.
+
+Пример реализации системы на ресурсах микросхемы
+представлен на рисунке~\ref{fig:bootstrap:compilation:implementation_result}
+
+\begin{center}
+  \centering
+  \includegraphics[scale=0.15]{implementation_result.png}
+  \captionof{figure}{Результат имплементации системы}
+  \label{fig:bootstrap:compilation:implementation_result}
+\end{center}
+
+Задать соответствие выводов микросхемы и выходов имплементированной схемы можно во вкладке \en{I/O Planning},
+при этом стоит учесть описание назначения каждого вывода. Пример планировки выводов микросхемы
+приведён на рисунке~\ref{fig:bootstrap:compilation:io_planning}
+
+\begin{center}
+  \centering
+  \includegraphics[scale=0.18]{io_planning.png}
+  \captionof{figure}{Планировка назначения выводов микросхемы}
+  \label{fig:bootstrap:compilation:io_planning}
+\end{center}
+
+Для запуска результата имплементации на микросхеме необходимо сгенерировать бистрим ---
+поток битов, описывающих функциональное назначение блоков микросхемы и взаимосвязь
+между ними. Процесс генерации битстрима схож с запуском синтеза.
+
+\subsection{Запуск на отладочной плате}
+\label{sec:bootstrap:board}
