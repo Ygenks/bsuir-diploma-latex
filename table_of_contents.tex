@@ -1,0 +1,29 @@
+% % Зачем: Содержание пишется полужирным шрифтом, по центру всеми заглавными буквами
+% % Почему: Пункт 2.2.7 Требований по оформлению пояснительной записки.
+% \renewcommand \contentsname {\centerline{\bfseries\large{\MakeUppercase{содержание}}}}
+
+% % Зачем: Не захламлять основной файл
+% % Примечание: \small\selectfont злостный хак, чтобы уменьшить размер шрифта в ToC
+% {
+% \normalsize\selectfont
+% \tableofcontents
+% \newpage
+% }
+
+
+% Зачем: Содержание пишется полужирным шрифтом, по центру всеми заглавными буквами
+% Почему: Пункт 2.2.7 Требований по оформлению пояснительной записки.
+\renewcommand \contentsname{\centerline{\normalsize\normalfont {\mdseries СОДЕРЖАНИЕ}}}
+\setlength\cftbeforetoctitleskip{-1.4cm}
+
+\pagenumbering{gobble}
+
+% Зачем: Не захламлять основной файл
+% Примечание: \small\selectfont злостный хак, чтобы уменьшить размер шрифта в ToC
+{
+\normalsize\selectfont
+\tableofcontents
+\newpage
+}
+
+\pagenumbering{arabic}
