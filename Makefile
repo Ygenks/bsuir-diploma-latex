@@ -14,4 +14,4 @@ practice: *.tex
 
 .PHONY: clean
 clean:
-	rm -f *.aux *.log *.out *.toc *.gz *.gz\(busy\) *.blg *.bbl
+	rm -f *.aux *.log *.out *.toc *.gz *.gz\(busy\) *.blg *.bbl *.fls *.xdv *.fdb_latexmk
