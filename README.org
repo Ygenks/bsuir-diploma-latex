@@ -1,0 +1,19 @@
+* BSUIR VMSIS TeX Template
+  Данный TeX-шаблон можно использовать в качестве базы для написания дипломной записки в соответствии
+  с [[https://www.bsuir.by/m/12_100229_1_87625.pdf][требованиями]] кафедры ЭВМ и [[https://www.bsuir.by/m/12_100229_1_80040.pdf][стандарта предприятия]] БГУИР.
+* Инструкции по сборке
+** Archlinux
+   Для сборки проекта необходимо установить следующий список пакетов из дистрибутива TeX-Live:
+   #+BEGIN_SRC bash
+   pacman -S texlive-bin texlive-core texlive-langcyrillic
+   texlive-latexextra texlive-science
+   #+END_SRC
+   Для поддержки шрифтов от MS необходимо установить следующий пакет из AUR:
+   #+BEGIN_SRC bash
+     pacaur -S ttf-ms-fonts
+   #+END_SRC
+   После чего требуется перейти в корень папки проекта и ввести следующую команду:
+   #+BEGIN_SRC bash
+     make
+   #+END_SRC
+   В случае успеха в папке появится файл diploma_report.pdf
